@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: petshop-bff-desktop
+  web:
+    resources:
+      add-mappings: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+    health:
+      show-details: always
+      enabled-by-default: true
+
+server:
+  port: 9998
+  servlet:
+    context-path: /petshop-bff-desktop
+    encoding:
+      charset: UTF-8
+      enabled: true
+  max-http-request-header-size: 48000
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+redis:
+  host: localhost
+  port: 6379
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+redis:
+  host: redis
+  port: 6379
