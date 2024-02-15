@@ -2,10 +2,9 @@ package com.petshopbffdesktop.exception;
 
 import lombok.Data;
 
-import java.util.function.Supplier;
-
 @Data
-public class InternalServerErrorException  extends Exception implements Supplier<InternalServerErrorException> {
+public class InternalServerErrorException  extends RuntimeException //implements Supplier<InternalServerErrorException>
+{
 
     String message;
 
@@ -18,7 +17,7 @@ public class InternalServerErrorException  extends Exception implements Supplier
         return message;
     }
 
-    @Override
+//    @Override
     public InternalServerErrorException get() {
         return this;
     }

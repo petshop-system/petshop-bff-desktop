@@ -12,25 +12,26 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class ServiceController {
 
-    private final String apiGatewayAddress;
-
     private final IServiceService serviceService;
 
-    public ServiceController(IServiceService serviceService,
-                             String apiGatewayAddress) {
+    public ServiceController(IServiceService serviceService) {
         this.serviceService = serviceService;
-        this.apiGatewayAddress = apiGatewayAddress;
     }
 
     @GetMapping(path = {"/{id}", "{id}/"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
     public ServiceResponse getByID(@PathVariable(value = "id") Long id) throws NotFoundException, InternalServerErrorException, JsonProcessingException {
-
         String getByIDPath = String.format(IServiceService.URL_GET_BY_ID, id);
-        String url = String.format("%s/%s", apiGatewayAddress, getByIDPath);
-        ServiceResponse resp = (ServiceResponse) serviceService.get(url, null);
+        return (ServiceResponse) serviceService.get(getByIDPath, null);
+    }
 
-        return resp;
+    @GetMapping(path = {"", "/"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    public ServiceResponse getByFilters(@RequestParam(value = "active", defaultValue = "true") boolean active,
+                                        @RequestParam(value = "contract", defaultValue = "1") Long contractID) throws NotFoundException, InternalServerErrorException, JsonProcessingException {
+        String getByFiltersPath = String.format(IServiceService.URL_GET_BY_FILTER, active, contractID);
+        return (ServiceResponse) serviceService.get(getByFiltersPath, null);
     }
 }

@@ -1,22 +1,20 @@
 package com.petshopbffdesktop.integration;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petshopbffdesktop.exception.InternalServerErrorException;
 import com.petshopbffdesktop.exception.NotFoundException;
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
-import java.util.Collection;
 import java.util.Map;
 
-@SuppressWarnings(value = {"unused", "unchecked"})
+@SuppressWarnings(value = {"raw", "unused", "unchecked"})
 public class GenericService<T, R> implements IGenericService<T, R> {
 
     Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -25,59 +23,96 @@ public class GenericService<T, R> implements IGenericService<T, R> {
 
     public static String INTERNAL_SERVER_ERROR_EXCEPTION = "internal server error";
 
-    private final RestTemplate restTemplate;
-
     private final ObjectMapper objectMapper;
+
+    private final WebClient defaultWebClient;
 
     private final Class<R> type;
 
-    public GenericService(RestTemplateBuilder restTemplateBuilder, Class<R> type, ObjectMapper objectMapper) {
-        this.restTemplate = restTemplateBuilder.build();
+    public GenericService(WebClient defaultWebClient, Class<R> type, ObjectMapper objectMapper) {
+        this.defaultWebClient = defaultWebClient;
         this.type = type;
         this.objectMapper = objectMapper;
     }
 
-    @Override
-    public R get(String url, Map<String, String> header) throws NotFoundException, InternalServerErrorException {
-
-        try {
-
-            ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-            if (response.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
-                throw new NotFoundException(GenericService.NOT_FOUND_EXCEPTION);
-            }
-
-            if (response.getStatusCode().is2xxSuccessful()) {
-                return objectMapper.readValue(response.getBody(), type);
-            }
-
-        } catch (RestClientException | JsonProcessingException e) {
-            logger.info("error to execute get request for class {}, error {}",
-                    this.type, e.getMessage());
-        }
-
-        throw new InternalServerErrorException(GenericService.INTERNAL_SERVER_ERROR_EXCEPTION);
+    private LinkedMultiValueMap getHeaders(Map<String, String> headers) {
+        LinkedMultiValueMap multiValueMap = new LinkedMultiValueMap();
+        if (!ObjectUtils.isEmpty(headers))
+            headers.forEach(multiValueMap::add);
+        return multiValueMap;
     }
 
     @Override
-    public R post(String url, Map<String, String> header, T t) throws NotFoundException, InternalServerErrorException {
+    public R get(String path, Map<String, String> headers) throws NotFoundException, InternalServerErrorException {
 
-        try {
+        Mono<R> resp = defaultWebClient.get()
+                .uri(path)
+                .headers(httpHeaders -> httpHeaders.addAll(this.getHeaders(headers)))
+                .retrieve()
+                .onStatus(HttpStatusCode::is5xxServerError, response -> {
+                    logger.error("error to execute get request for class {}, path {}", this.type, path);
+                    return Mono.error(new InternalServerErrorException(GenericService.INTERNAL_SERVER_ERROR_EXCEPTION));
+                })
+                .onStatus(statusCode -> statusCode.value() == HttpStatus.NOT_FOUND.value(), response -> {
+                    logger.warn("warning to execute get request for class {}, path {}", this.type, path);
+                    return Mono.error(new NotFoundException(GenericService.NOT_FOUND_EXCEPTION));
+                })
+                .bodyToMono(type);
 
-            ResponseEntity<String> response = restTemplate.postForEntity(url, t, String.class);
-            if (response.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
-                throw new NotFoundException(GenericService.NOT_FOUND_EXCEPTION);
-            }
+        return resp.block();
+    }
 
-            if (response.getStatusCode().is2xxSuccessful())
-                return objectMapper.readValue(response.getBody(), type);
+    @Override
+    public R post(String path, Map<String, String> headers, T t) throws NotFoundException, InternalServerErrorException {
+        return defaultWebClient.post()
+                .uri(path)
+                .body(Mono.just(t), type)
+                .headers(httpHeaders -> httpHeaders.addAll(this.getHeaders(headers)))
+                .retrieve()
+                .onStatus(HttpStatusCode::is5xxServerError, response -> {
+                    logger.error("error to execute post request for class {}, path {}", this.type, path);
+                    return Mono.error(new InternalServerErrorException(GenericService.INTERNAL_SERVER_ERROR_EXCEPTION));
+                })
+                .onStatus(statusCode -> statusCode.value() == HttpStatus.NOT_FOUND.value(), response -> {
+                    logger.warn("warning to execute post request for class {}, path {}", this.type, path);
+                    return Mono.error(new NotFoundException(GenericService.NOT_FOUND_EXCEPTION));
+                })
+                .bodyToMono(type).block();
+    }
 
-        } catch (RestClientException | JsonProcessingException e) {
-            logger.info("error to execute post request for class {}, error {}",
-                    this.type, e.getMessage());
-        }
+    @Override
+    public R put(String path, Map<String, String> headers, T t) throws NotFoundException, InternalServerErrorException {
+        return defaultWebClient.put()
+                .uri(path)
+                .body(Mono.just(t), type)
+                .headers(httpHeaders -> httpHeaders.addAll(this.getHeaders(headers)))
+                .retrieve()
+                .onStatus(HttpStatusCode::is5xxServerError, response -> {
+                    logger.error("error to execute put request for class {}, path {}", this.type, path);
+                    return Mono.error(new InternalServerErrorException(GenericService.INTERNAL_SERVER_ERROR_EXCEPTION));
+                })
+                .onStatus(statusCode -> statusCode.value() == HttpStatus.NOT_FOUND.value(), response -> {
+                    logger.warn("warning to execute put request for class {}, path {}", this.type, path);
+                    return Mono.error(new NotFoundException(GenericService.NOT_FOUND_EXCEPTION));
+                })
+                .bodyToMono(type).block();
+    }
 
-        throw new InternalServerErrorException(GenericService.INTERNAL_SERVER_ERROR_EXCEPTION);
+    @Override
+    public R delete(String path, Map<String, String> headers) throws NotFoundException, InternalServerErrorException {
+        return defaultWebClient.delete()
+                .uri(path)
+                .headers(httpHeaders -> httpHeaders.addAll(this.getHeaders(headers)))
+                .retrieve()
+                .onStatus(HttpStatusCode::is5xxServerError, response -> {
+                    logger.error("error to execute delete request for class {}, path {}", this.type, path);
+                    return Mono.error(new InternalServerErrorException(GenericService.INTERNAL_SERVER_ERROR_EXCEPTION));
+                })
+                .onStatus(statusCode -> statusCode.value() == HttpStatus.NOT_FOUND.value(), response -> {
+                    logger.warn("warning to execute delete request for class {}, path {}", this.type, path);
+                    return Mono.error(new NotFoundException(GenericService.NOT_FOUND_EXCEPTION));
+                })
+                .bodyToMono(type).block();
     }
 
 }

@@ -2,10 +2,9 @@ package com.petshopbffdesktop.exception;
 
 import lombok.Data;
 
-import java.util.function.Supplier;
-
 @Data
-public class NotFoundException extends Exception implements Supplier<NotFoundException> {
+public class NotFoundException extends Exception // implements Supplier<NotFoundException>
+{
 
     String message;
 
@@ -18,7 +17,7 @@ public class NotFoundException extends Exception implements Supplier<NotFoundExc
         return message;
     }
 
-    @Override
+//    @Override
     public NotFoundException get() {
         return this;
     }
