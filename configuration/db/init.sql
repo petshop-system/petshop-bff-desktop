@@ -21,7 +21,8 @@ VALUES
     ('schedule-request', '{"host": "http://petshop-message-api:5003","app-context": "petshop-message-api"}'),
     ('service', '{"host": "http://petshop-admin-api:5002", "app-context": "petshop-admin-api"}'),
     ('bff-mobile-customer', '{"host": "http://petshop-bff-mobile:9997", "app-context": "petshop-bff-mobile"}'),
-    ('bff-desktop-customer', '{"host": "http://petshop-bff-mobile:9998", "app-context": "petshop-bff-desktop"}');
+    ('bff-desktop-customer', '{"host": "http://petshop-bff-desktop:9998", "app-context": "petshop-bff-desktop"}'),
+    ('bff-desktop-service', '{"host": "http://petshop-bff-desktop:9998", "app-context": "petshop-bff-desktop"}');
 
 create schema petshop_api
 
