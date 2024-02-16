@@ -124,5 +124,26 @@ services:
         condition: service_started
     networks:
       rede_local:
+
+  petshop-bff-desktop:
+    container_name: petshop-bff-desktop
+    build: ${DEV_ENV_FOLDER}/petshop-bff-desktop
+    restart: always
+    environment:
+      - SPRING_PROFILE=docker
+      - REDIS_ADDR=redis:6379
+      - DOCKER_EXPOSE_PORT=9998
+    ports:
+      - "9998:9998"
+    expose:
+      - "9998"
+    depends_on:
+      redis:
+        condition: service_started
+      petshop-api-gateway:
+        condition: service_started
+    networks:
+      rede_local:
+
 networks:
   rede_local:

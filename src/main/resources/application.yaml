@@ -43,6 +43,10 @@ spring:
     activate:
       on-profile: docker
 
+api-gateway:
+  address: http://petshop-api-gateway:9999/petshop-system
+  timeout: 2500
+
 redis:
   host: redis
   port: 6379

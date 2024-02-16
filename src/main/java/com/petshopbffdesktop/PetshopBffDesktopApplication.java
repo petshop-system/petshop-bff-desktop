@@ -43,7 +43,7 @@ public class PetshopBffDesktopApplication implements CommandLineRunner {
 
 
     @Value(value = "${api-gateway.timeout}")
-    private int timeout;
+    private int apiGatewayTimeout;
 
     public static void main(String[] args) {
         SpringApplication app = new SpringApplication(PetshopBffDesktopApplication.class);
@@ -82,16 +82,11 @@ public class PetshopBffDesktopApplication implements CommandLineRunner {
 
     private HttpClient defaultHttpClient () {
         return HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
-                .responseTimeout(Duration.ofMillis(5000))
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, apiGatewayTimeout)
+                .responseTimeout(Duration.ofMillis(apiGatewayTimeout))
                 .doOnConnected(conn ->
-                        conn.addHandlerLast(new ReadTimeoutHandler(5000, TimeUnit.MILLISECONDS))
-                                .addHandlerLast(new WriteTimeoutHandler(5000, TimeUnit.MILLISECONDS)));
-    }
-
-    @Bean
-    public String apiGatewayAddress() {
-        return apiGatewayAddress;
+                        conn.addHandlerLast(new ReadTimeoutHandler(apiGatewayTimeout, TimeUnit.MILLISECONDS))
+                                .addHandlerLast(new WriteTimeoutHandler(apiGatewayTimeout, TimeUnit.MILLISECONDS)));
     }
 
     @Override
