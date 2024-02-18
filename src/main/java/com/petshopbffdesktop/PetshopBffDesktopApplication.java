@@ -32,12 +32,6 @@ public class PetshopBffDesktopApplication implements CommandLineRunner {
     @Value(value = "${spring.config.activate.on-profile}")
     private String activeProfile;
 
-    @Value(value = "${redis.host}")
-    private String redisHost;
-
-    @Value(value = "${redis.port}")
-    private int redisPort;
-
     @Value(value = "${api-gateway.address}")
     private String apiGatewayAddress;
 
@@ -57,20 +51,7 @@ public class PetshopBffDesktopApplication implements CommandLineRunner {
     }
 
     @Bean
-    JedisConnectionFactory jedisConnectionFactory() {
-        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(redisHost, redisPort);
-        return new JedisConnectionFactory(config);
-    }
-
-    @Bean
-    public RedisTemplate<String, Object> redisTemplate() {
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(jedisConnectionFactory());
-        return template;
-    }
-
-    @Bean
-    public WebClient defaultWebClient () {
+    public WebClient defaultWebClient() {
         return WebClient.builder()
                 .baseUrl(apiGatewayAddress)
 //                .defaultCookie("cookieKey", "cookieValue")
@@ -80,7 +61,7 @@ public class PetshopBffDesktopApplication implements CommandLineRunner {
                 .build();
     }
 
-    private HttpClient defaultHttpClient () {
+    private HttpClient defaultHttpClient() {
         return HttpClient.create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, apiGatewayTimeout)
                 .responseTimeout(Duration.ofMillis(apiGatewayTimeout))
@@ -93,9 +74,8 @@ public class PetshopBffDesktopApplication implements CommandLineRunner {
     public void run(String... args) {
 
         logger.info("#############################################################");
-
-        logger.info("redisHost: {}", redisHost);
-        logger.info("redisPort: {}", redisPort);
+        logger.info("activeProfile: {}", this.activeProfile);
+        logger.info("apiGatewayTimeout: {}", this.apiGatewayTimeout);
         logger.info("apiGatewayAddress: {}", this.apiGatewayAddress);
         logger.info("#############################################################");
 

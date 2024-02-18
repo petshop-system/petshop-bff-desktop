@@ -18,7 +18,7 @@ public class ServiceController {
         this.serviceService = serviceService;
     }
 
-    @GetMapping(path = {"/{id}", "{id}/"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = {"/{id}", "/{id}/"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
     public ServiceResponse getByID(@PathVariable(value = "id") Long id) throws NotFoundException, InternalServerErrorException, JsonProcessingException {
