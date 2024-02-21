@@ -9,7 +9,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class ServiceConfiguration {
 
     @Bean
-    public IServiceService serviceService(WebClient defaultWebClient, ObjectMapper objectMapper){
+    public ServiceUserCase serviceUserCase(WebClient defaultWebClient, ObjectMapper objectMapper){
         return new ServiceService(defaultWebClient, objectMapper);
     }
 
