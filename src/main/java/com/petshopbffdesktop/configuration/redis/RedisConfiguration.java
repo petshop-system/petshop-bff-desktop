@@ -1,6 +1,7 @@
-package com.petshopbffdesktop.configuration;
+package com.petshopbffdesktop.configuration.redis;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
@@ -10,19 +11,20 @@ import org.springframework.data.redis.core.RedisTemplate;
 @Configuration
 public class RedisConfiguration {
 
-    @Value(value = "${redis.host}")
-    private String redisHost;
-
-    @Value(value = "${redis.port}")
-    private int redisPort;
-
-    @Value(value = "${redis.database:1}")
-    private int database;
+    @Bean
+    @ConfigurationProperties("redis")
+    RedisProperties redisProperties () {
+        return new RedisProperties();
+    }
 
     @Bean
     JedisConnectionFactory jedisConnectionFactory() {
-        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(redisHost, redisPort);
-        config.setDatabase(database);
+
+        RedisProperties redisProperties = this.redisProperties();
+        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(redisProperties.getHost(),
+                redisProperties.getPort());
+        config.setDatabase(redisProperties.getDatabase());
+
         return new JedisConnectionFactory(config);
     }
 
