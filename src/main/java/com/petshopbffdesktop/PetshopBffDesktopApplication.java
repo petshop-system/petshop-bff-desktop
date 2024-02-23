@@ -31,13 +31,6 @@ public class PetshopBffDesktopApplication implements CommandLineRunner {
 
     @Value(value = "${spring.config.activate.on-profile}")
     private String activeProfile;
-//
-//    @Value(value = "${api-gateway.address}")
-//    private String apiGatewayAddress;
-//
-//
-//    @Value(value = "${api-gateway.timeout}")
-//    private int apiGatewayTimeout;
 
     public static void main(String[] args) {
         SpringApplication app = new SpringApplication(PetshopBffDesktopApplication.class);
@@ -55,8 +48,6 @@ public class PetshopBffDesktopApplication implements CommandLineRunner {
 
         logger.info("#############################################################");
         logger.info("activeProfile: {}", this.activeProfile);
-//        logger.info("apiGatewayTimeout: {}", this.apiGatewayTimeout);
-//        logger.info("apiGatewayAddress: {}", this.apiGatewayAddress);
         logger.info("#############################################################");
 
     }
