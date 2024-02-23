@@ -29,14 +29,15 @@ spring:
     activate:
       on-profile: dev
 
-api-gateway:
-  address: http://localhost:9999/petshop-system
-  timeout: 2500
-
 redis:
   host: localhost
   port: 6379
   database: 1
+
+webclient:
+  default:
+    api-gateway-address: http://localhost:9999/petshop-system
+    api-gateway-timeout: 2500
 
 ---
 spring:
@@ -44,11 +45,12 @@ spring:
     activate:
       on-profile: docker
 
-api-gateway:
-  address: http://petshop-api-gateway:9999/petshop-system
-  timeout: 2500
-
 redis:
   host: redis
   port: 6379
   database: 1
+
+webclient:
+  default:
+    api-gateway-address: http://petshop-api-gateway:9999/petshop-system
+    api-gateway-timeout: 2500

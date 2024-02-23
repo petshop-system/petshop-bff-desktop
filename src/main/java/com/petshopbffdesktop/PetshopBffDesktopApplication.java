@@ -31,13 +31,13 @@ public class PetshopBffDesktopApplication implements CommandLineRunner {
 
     @Value(value = "${spring.config.activate.on-profile}")
     private String activeProfile;
-
-    @Value(value = "${api-gateway.address}")
-    private String apiGatewayAddress;
-
-
-    @Value(value = "${api-gateway.timeout}")
-    private int apiGatewayTimeout;
+//
+//    @Value(value = "${api-gateway.address}")
+//    private String apiGatewayAddress;
+//
+//
+//    @Value(value = "${api-gateway.timeout}")
+//    private int apiGatewayTimeout;
 
     public static void main(String[] args) {
         SpringApplication app = new SpringApplication(PetshopBffDesktopApplication.class);
@@ -50,33 +50,13 @@ public class PetshopBffDesktopApplication implements CommandLineRunner {
         return objectMapper.registerModule(new JavaTimeModule());
     }
 
-    @Bean
-    public WebClient defaultWebClient() {
-        return WebClient.builder()
-                .baseUrl(apiGatewayAddress)
-//                .defaultCookie("cookieKey", "cookieValue")
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-//                .defaultUriVariables(Collections.singletonMap("url", "http://localhost:8080"))
-                .clientConnector(new ReactorClientHttpConnector(this.defaultHttpClient()))
-                .build();
-    }
-
-    private HttpClient defaultHttpClient() {
-        return HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, apiGatewayTimeout)
-                .responseTimeout(Duration.ofMillis(apiGatewayTimeout))
-                .doOnConnected(conn ->
-                        conn.addHandlerLast(new ReadTimeoutHandler(apiGatewayTimeout, TimeUnit.MILLISECONDS))
-                                .addHandlerLast(new WriteTimeoutHandler(apiGatewayTimeout, TimeUnit.MILLISECONDS)));
-    }
-
     @Override
     public void run(String... args) {
 
         logger.info("#############################################################");
         logger.info("activeProfile: {}", this.activeProfile);
-        logger.info("apiGatewayTimeout: {}", this.apiGatewayTimeout);
-        logger.info("apiGatewayAddress: {}", this.apiGatewayAddress);
+//        logger.info("apiGatewayTimeout: {}", this.apiGatewayTimeout);
+//        logger.info("apiGatewayAddress: {}", this.apiGatewayAddress);
         logger.info("#############################################################");
 
     }
